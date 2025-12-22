@@ -5,8 +5,10 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
+  const isProd = mode === 'production';
+
   return {
-    base: './',
+    base: isProd ? '/DebtWise/' : '/',
     server: {
       port: 3000,
       host: '0.0.0.0',
@@ -23,6 +25,8 @@ export default defineConfig(({ mode }) => {
           theme_color: '#050510',
           background_color: '#050510',
           display: 'standalone',
+          start_url: '/DebtWise/',
+          scope: '/DebtWise/',
           icons: [
             {
               src: 'icons/icon-192.png',

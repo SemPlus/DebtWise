@@ -75,7 +75,7 @@ const DataManagement: React.FC<DataManagementProps> = ({ debts, groups, onImport
         <div className="mt-12 mb-8 p-6 bg-[#0d0d1f] rounded-3xl border border-slate-800 flex flex-col items-center gap-6">
             <div className="text-center">
                 <h3 className="text-sm font-black text-white uppercase tracking-widest mb-1">Data Management</h3>
-                <p className="text-[10px] text-slate-501 uppercase font-bold tracking-widest opacity-60">Backup & Restore your ledger</p>
+                <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest opacity-60">Backup & Restore your ledger</p>
             </div>
 
             <div className="flex flex-wrap justify-center gap-4 w-full">

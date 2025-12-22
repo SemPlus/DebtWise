@@ -35,6 +35,21 @@
       background: #2e2e5f;
     }
   </style>
+  <script>
+    // Global error handler to help debug blank screens on mobile
+    window.onerror = function (msg, url, line, col, error) {
+      const errorMsg = "Error: " + msg + "\nURL: " + url + "\nLine: " + line;
+      console.error(errorMsg);
+      // Only alert on mobile to avoid bothering desktop users
+      if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        alert(errorMsg);
+      }
+      return false;
+    };
+    window.addEventListener('unhandledrejection', function (event) {
+      alert("Promise Rejection: " + event.reason);
+    });
+  </script>
 </head>
 
 <body>
