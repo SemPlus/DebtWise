@@ -12,8 +12,15 @@ import ContactsHistory from './components/ContactsHistory';
 import DataManagement from './components/DataManagement';
 import { hapticFeedback } from './utils/haptics';
 import { getDebtTotalWithFees } from './utils/feeCalculator';
+import { useRegisterSW } from 'virtual:pwa-register/react';
 
 const App: React.FC = () => {
+  // PWA Update Logic
+  const {
+    needRefresh: [needRefresh, setNeedRefresh],
+    updateServiceWorker,
+  } = useRegisterSW();
+
   const [currentView, setCurrentView] = useState<'dashboard' | 'history'>('dashboard');
   const [groups, setGroups] = useState<Group[]>(() => {
     const saved = localStorage.getItem('groups');
@@ -241,6 +248,21 @@ const App: React.FC = () => {
             <span className="text-sm">Add New</span>
           </button>
         </header>
+
+        {needRefresh && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] bg-blue-600/90 backdrop-blur-md border border-blue-400/30 p-4 rounded-3xl shadow-2xl flex items-center gap-4 animate-in slide-in-from-bottom-5">
+            <div className="text-white">
+              <p className="text-xs font-black uppercase tracking-wider">Update Available!</p>
+              <p className="text-[10px] opacity-80">Reload to use the latest version.</p>
+            </div>
+            <button
+              onClick={() => updateServiceWorker(true)}
+              className="bg-white text-blue-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase shadow-lg active:scale-95"
+            >
+              Reload
+            </button>
+          </div>
+        )}
 
         <div className="relative flex p-1 bg-[#0d0d1f] border border-slate-800 rounded-2xl mb-10 self-start w-full sm:w-80 shadow-inner overflow-hidden">
           <div className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-blue-600 rounded-xl transition-all duration-300 ease-out shadow-lg shadow-blue-900/30 ${currentView === 'dashboard' ? 'left-1' : 'left-[calc(50%+1px)]'}`} />

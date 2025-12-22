@@ -36,18 +36,23 @@
     }
   </style>
   <script>
-    // Global error handler to help debug blank screens on mobile
+    // 1. Ensure trailing slash for GitHub Pages (avoids 404s on relative assets)
+    if (window.location.pathname.endsWith('/DebtWise')) {
+      window.location.replace(window.location.pathname + '/');
+    }
+
+    // 2. Global error handler for mobile debugging
     window.onerror = function (msg, url, line, col, error) {
-      const errorMsg = "Error: " + msg + "\nURL: " + url + "\nLine: " + line;
+      const errorMsg = "🛑 App Error:\n" + msg + "\n\nFile: " + url + "\nLine: " + line;
       console.error(errorMsg);
-      // Only alert on mobile to avoid bothering desktop users
       if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
         alert(errorMsg);
       }
       return false;
     };
+
     window.addEventListener('unhandledrejection', function (event) {
-      alert("Promise Rejection: " + event.reason);
+      alert("🛑 Promise Error: " + event.reason);
     });
   </script>
 </head>
