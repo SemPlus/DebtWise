@@ -60,6 +60,22 @@
       background: #2e2e5f;
     }
   </style>
+  <script>
+    // 2. SERVICE WORKER KILLER (Run this once to clear stuck versions)
+    // To trigger: visit the site with ?killsw=true
+    if (window.location.search.includes('killsw=true')) {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function (registrations) {
+          for (let registration of registrations) {
+            registration.unregister();
+          }
+          alert("Service Workers cleared. Reloading...");
+          window.location.replace(window.location.pathname);
+        });
+      }
+    }
+  </script>
+</head>
 
 <body>
   <div id="debug-log"

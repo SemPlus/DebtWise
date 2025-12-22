@@ -17,6 +17,10 @@ export default defineConfig(({ mode }) => {
       react(),
       VitePWA({
         registerType: 'autoUpdate',
+        workbox: {
+          skipWaiting: true,
+          clientsClaim: true,
+        },
         includeAssets: ['icons/icon-192.png', 'icons/icon-512.png'],
         manifest: {
           name: 'DebtWise - Debt Tracker',
