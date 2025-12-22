@@ -9,6 +9,7 @@ import SettlementModal from './components/SettlementModal';
 import DebtHistoryModal from './components/DebtHistoryModal';
 import GroupSwitcher from './components/GroupSwitcher';
 import ContactsHistory from './components/ContactsHistory';
+import DataManagement from './components/DataManagement';
 import { hapticFeedback } from './utils/haptics';
 import { getDebtTotalWithFees } from './utils/feeCalculator';
 
@@ -59,8 +60,8 @@ const App: React.FC = () => {
   }, [debts, groups]);
 
   const balances = useMemo<BalanceState>(() => {
-    const activeDebts = activeGroupId === 'ALL' 
-      ? debtsWithUpdatedFees 
+    const activeDebts = activeGroupId === 'ALL'
+      ? debtsWithUpdatedFees
       : debtsWithUpdatedFees.filter(d => d.groupId === activeGroupId);
 
     const totalIOwe = activeDebts
@@ -99,8 +100,8 @@ const App: React.FC = () => {
         if (debt.isSettled) {
           let successMultiplier = 1.0;
           const creationDate = new Date(debt.date);
-          const lastPaymentDate = debt.history.length > 0 
-            ? new Date(debt.history[debt.history.length - 1].date) 
+          const lastPaymentDate = debt.history.length > 0
+            ? new Date(debt.history[debt.history.length - 1].date)
             : creationDate;
           const daysToSettle = (lastPaymentDate.getTime() - creationDate.getTime()) / (1000 * 3600 * 24);
 
@@ -215,6 +216,11 @@ const App: React.FC = () => {
     }
   };
 
+  const handleImportData = (data: { debts: Debt[]; groups: Group[] }) => {
+    setDebts(data.debts);
+    setGroups(data.groups);
+  };
+
   const currentSettlementDebt = debtsWithUpdatedFees.find(d => d.id === settlementDebtId);
   const currentHistoryDebt = debtsWithUpdatedFees.find(d => d.id === historyDebtId);
   const currentEditingDebt = debtsWithUpdatedFees.find(d => d.id === editingDebtId);
@@ -227,7 +233,7 @@ const App: React.FC = () => {
             <h1 className="text-2xl md:text-3xl font-black tracking-tighter text-white">DebtWise</h1>
             <p className="text-slate-400 text-[10px] md:text-xs uppercase font-bold tracking-widest mt-0.5 opacity-60">Smart Financial Ledger</p>
           </div>
-          <button 
+          <button
             onClick={() => { hapticFeedback.action(); setEditingDebtId(null); setIsAddModalOpen(true); }}
             className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-2xl transition-all shadow-lg shadow-blue-900/20 flex items-center gap-2 active:scale-95"
           >
@@ -237,9 +243,9 @@ const App: React.FC = () => {
         </header>
 
         <div className="relative flex p-1 bg-[#0d0d1f] border border-slate-800 rounded-2xl mb-10 self-start w-full sm:w-80 shadow-inner overflow-hidden">
-           <div className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-blue-600 rounded-xl transition-all duration-300 ease-out shadow-lg shadow-blue-900/30 ${currentView === 'dashboard' ? 'left-1' : 'left-[calc(50%+1px)]'}`} />
-           <button onClick={() => { hapticFeedback.action(); setCurrentView('dashboard'); }} className={`relative z-10 flex-1 py-3 text-[10px] font-black uppercase tracking-[0.15em] transition-colors duration-300 text-center ${currentView === 'dashboard' ? 'text-white' : 'text-slate-500 hover:text-slate-400'}`}>Dashboard</button>
-           <button onClick={() => { hapticFeedback.action(); setCurrentView('history'); }} className={`relative z-10 flex-1 py-3 text-[10px] font-black uppercase tracking-[0.15em] transition-colors duration-300 text-center ${currentView === 'history' ? 'text-white' : 'text-slate-500 hover:text-slate-400'}`}>Network</button>
+          <div className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-blue-600 rounded-xl transition-all duration-300 ease-out shadow-lg shadow-blue-900/30 ${currentView === 'dashboard' ? 'left-1' : 'left-[calc(50%+1px)]'}`} />
+          <button onClick={() => { hapticFeedback.action(); setCurrentView('dashboard'); }} className={`relative z-10 flex-1 py-3 text-[10px] font-black uppercase tracking-[0.15em] transition-colors duration-300 text-center ${currentView === 'dashboard' ? 'text-white' : 'text-slate-500 hover:text-slate-400'}`}>Dashboard</button>
+          <button onClick={() => { hapticFeedback.action(); setCurrentView('history'); }} className={`relative z-10 flex-1 py-3 text-[10px] font-black uppercase tracking-[0.15em] transition-colors duration-300 text-center ${currentView === 'history' ? 'text-white' : 'text-slate-500 hover:text-slate-400'}`}>Network</button>
         </div>
 
         {currentView === 'dashboard' ? (
@@ -265,6 +271,7 @@ const App: React.FC = () => {
                 <TrendsChart debts={debtsWithUpdatedFees} />
               </div>
             </div>
+            <DataManagement debts={debts} groups={groups} onImport={handleImportData} />
           </>
         ) : (
           <ContactsHistory debts={debtsWithUpdatedFees} reliabilityScores={reliabilityScores} onViewDebtHistory={(id) => { hapticFeedback.action(); setHistoryDebtId(id); }} />

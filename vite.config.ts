@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => {
         registerType: 'autoUpdate',
         includeAssets: ['icons/icon-192.png', 'icons/icon-512.png'],
         manifest: {
-          name: 'DebtWise - Smart Debt Tracker',
+          name: 'DebtWise - Debt Tracker',
           short_name: 'DebtWise',
           description: 'Efficiently track and manage your debts and shared expenses.',
           theme_color: '#050510',

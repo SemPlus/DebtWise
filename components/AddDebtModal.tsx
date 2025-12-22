@@ -8,7 +8,7 @@ type SplitMode = 'EQUALLY' | 'PERCENTAGE' | 'EXACT';
 
 interface Participant {
   name: string;
-  value: string; 
+  value: string;
 }
 
 interface AddDebtModalProps {
@@ -45,6 +45,37 @@ const AddDebtModal: React.FC<AddDebtModalProps> = ({ initialData, savedNames = [
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [nameSearch, setNameSearch] = useState('');
   const [showNameMenu, setShowNameMenu] = useState(false);
+  const [isContactPickerSupported, setIsContactPickerSupported] = useState(false);
+
+  useEffect(() => {
+    // @ts-ignore - Contacts API is not in all typings yet
+    if ('contacts' in navigator && 'ContactsManager' in window) {
+      setIsContactPickerSupported(true);
+    }
+  }, []);
+
+  const handleImportContact = async () => {
+    try {
+      hapticFeedback.action();
+      // @ts-ignore
+      const props = ['name'];
+      const opts = { multiple: isSplitMode };
+      // @ts-ignore
+      const contacts = await navigator.contacts.select(props, opts);
+
+      if (contacts && contacts.length > 0) {
+        if (isSplitMode) {
+          const newParticipants = contacts.map((c: any) => ({ name: c.name[0], value: '' }));
+          setParticipants(prev => [...prev, ...newParticipants]);
+        } else {
+          setFormData(prev => ({ ...prev, name: contacts[0].name[0] }));
+        }
+        hapticFeedback.success();
+      }
+    } catch (err) {
+      console.error('Contact picker error:', err);
+    }
+  };
 
   useEffect(() => {
     if (initialData) {
@@ -65,8 +96,8 @@ const AddDebtModal: React.FC<AddDebtModalProps> = ({ initialData, savedNames = [
 
   const filteredSavedNames = useMemo(() => {
     const search = nameSearch.toLowerCase().trim();
-    return savedNames.filter(name => 
-      name.toLowerCase().includes(search) && 
+    return savedNames.filter(name =>
+      name.toLowerCase().includes(search) &&
       !participants.some(p => p.name === name)
     );
   }, [savedNames, nameSearch, participants]);
@@ -147,7 +178,7 @@ const AddDebtModal: React.FC<AddDebtModalProps> = ({ initialData, savedNames = [
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto no-scrollbar">
           {/* Record Type Toggle */}
           <div>
@@ -194,35 +225,35 @@ const AddDebtModal: React.FC<AddDebtModalProps> = ({ initialData, savedNames = [
 
           {/* Styled Date Picker */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             <div>
-                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Start Date</label>
-                <div className="relative group">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 00-2 2z" /></svg>
-                  </div>
-                  <input
-                    required
-                    type="date"
-                    value={formData.date}
-                    onChange={e => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full bg-[#050510] border border-slate-800 rounded-2xl pl-12 pr-4 py-3.5 text-white text-xs font-bold [color-scheme:dark] outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all"
-                  />
+            <div>
+              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Start Date</label>
+              <div className="relative group">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 00-2 2z" /></svg>
                 </div>
-             </div>
-             <div>
-                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Due Date (Optional)</label>
-                <div className="relative group">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-amber-500 transition-colors">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  </div>
-                  <input
-                      type="date"
-                      value={formData.expectedReturnDate}
-                      onChange={e => setFormData({ ...formData, expectedReturnDate: e.target.value })}
-                      className="w-full bg-[#050510] border border-slate-800 rounded-2xl pl-12 pr-4 py-3.5 text-white text-xs font-bold [color-scheme:dark] outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/5 transition-all"
-                    />
+                <input
+                  required
+                  type="date"
+                  value={formData.date}
+                  onChange={e => setFormData({ ...formData, date: e.target.value })}
+                  className="w-full bg-[#050510] border border-slate-800 rounded-2xl pl-12 pr-4 py-3.5 text-white text-xs font-bold [color-scheme:dark] outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Due Date (Optional)</label>
+              <div className="relative group">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-amber-500 transition-colors">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 </div>
-             </div>
+                <input
+                  type="date"
+                  value={formData.expectedReturnDate}
+                  onChange={e => setFormData({ ...formData, expectedReturnDate: e.target.value })}
+                  className="w-full bg-[#050510] border border-slate-800 rounded-2xl pl-12 pr-4 py-3.5 text-white text-xs font-bold [color-scheme:dark] outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/5 transition-all"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Quick Date Presets */}
@@ -247,10 +278,10 @@ const AddDebtModal: React.FC<AddDebtModalProps> = ({ initialData, savedNames = [
           {!initialData && (
             <div className="flex items-center justify-between p-4 bg-[#11112b] rounded-2xl border border-blue-500/20">
               <div className="flex items-center gap-3">
-                 <div className="p-2 bg-blue-500/20 rounded-lg text-blue-400">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                 </div>
-                 <span className="text-xs font-bold text-white">Split with others?</span>
+                <div className="p-2 bg-blue-500/20 rounded-lg text-blue-400">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                </div>
+                <span className="text-xs font-bold text-white">Split with others?</span>
               </div>
               <button
                 type="button"
@@ -266,23 +297,23 @@ const AddDebtModal: React.FC<AddDebtModalProps> = ({ initialData, savedNames = [
             <div className="space-y-6 animate-in slide-in-from-top-2">
               <div className="grid grid-cols-2 gap-4">
                 <input
-                    required
-                    type="number"
-                    step="0.01"
-                    placeholder="Total Amount"
-                    value={totalBill}
-                    onChange={e => setTotalBill(e.target.value)}
-                    className="bg-[#050510] border border-slate-800 rounded-2xl px-4 py-3 text-white focus:outline-none font-bold"
-                  />
+                  required
+                  type="number"
+                  step="0.01"
+                  placeholder="Total Amount"
+                  value={totalBill}
+                  onChange={e => setTotalBill(e.target.value)}
+                  className="bg-[#050510] border border-slate-800 rounded-2xl px-4 py-3 text-white focus:outline-none font-bold"
+                />
                 <select
-                    value={splitType}
-                    onChange={e => setSplitType(e.target.value as SplitMode)}
-                    className="bg-[#050510] border border-slate-800 rounded-2xl px-4 py-3 text-white text-xs font-bold"
-                  >
-                    <option value="EQUALLY">Equally</option>
-                    <option value="PERCENTAGE">%</option>
-                    <option value="EXACT">$</option>
-                  </select>
+                  value={splitType}
+                  onChange={e => setSplitType(e.target.value as SplitMode)}
+                  className="bg-[#050510] border border-slate-800 rounded-2xl px-4 py-3 text-white text-xs font-bold"
+                >
+                  <option value="EQUALLY">Equally</option>
+                  <option value="PERCENTAGE">%</option>
+                  <option value="EXACT">$</option>
+                </select>
               </div>
 
               <div className="relative">
@@ -295,6 +326,16 @@ const AddDebtModal: React.FC<AddDebtModalProps> = ({ initialData, savedNames = [
                     onChange={e => setNameSearch(e.target.value)}
                     className="flex-grow bg-[#050510] border border-slate-800 rounded-2xl px-4 py-3 text-white text-xs outline-none"
                   />
+                  {isContactPickerSupported && (
+                    <button
+                      type="button"
+                      onClick={handleImportContact}
+                      className="px-3 bg-slate-800 text-blue-400 rounded-2xl border border-blue-500/20 active:scale-95 transition-transform"
+                      title="Import from contacts"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                    </button>
+                  )}
                   <button type="button" onClick={() => addParticipant(nameSearch)} className="px-4 bg-blue-600 text-white rounded-2xl">+</button>
                 </div>
                 {showNameMenu && filteredSavedNames.length > 0 && nameSearch && (
@@ -311,12 +352,12 @@ const AddDebtModal: React.FC<AddDebtModalProps> = ({ initialData, savedNames = [
                   <div key={idx} className="flex items-center gap-3 p-3 bg-[#050510] rounded-2xl border border-slate-800/50">
                     <span className="flex-grow text-xs font-bold text-white truncate">{p.name}</span>
                     {splitType !== 'EQUALLY' && (
-                        <input
-                          type="number"
-                          value={p.value}
-                          onChange={e => updateParticipantValue(idx, e.target.value)}
-                          className="w-20 bg-[#11112b] border border-slate-800 rounded-xl px-2 py-1 text-xs text-white text-right outline-none"
-                        />
+                      <input
+                        type="number"
+                        value={p.value}
+                        onChange={e => updateParticipantValue(idx, e.target.value)}
+                        className="w-20 bg-[#11112b] border border-slate-800 rounded-xl px-2 py-1 text-xs text-white text-right outline-none"
+                      />
                     )}
                     <button type="button" onClick={() => removeParticipant(idx)} className="text-slate-500 hover:text-rose-500">×</button>
                   </div>
@@ -327,7 +368,7 @@ const AddDebtModal: React.FC<AddDebtModalProps> = ({ initialData, savedNames = [
             <div className="space-y-6">
               <div>
                 <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Who</label>
-                <div className="relative">
+                <div className="relative flex gap-2">
                   <input
                     required
                     type="text"
@@ -338,8 +379,17 @@ const AddDebtModal: React.FC<AddDebtModalProps> = ({ initialData, savedNames = [
                       setFormData({ ...formData, name: e.target.value });
                       setNameSearch(e.target.value);
                     }}
-                    className="w-full bg-[#050510] border border-slate-800 rounded-2xl px-4 py-3 text-white placeholder-slate-700 focus:outline-none font-medium text-sm"
+                    className="flex-grow bg-[#050510] border border-slate-800 rounded-2xl px-4 py-3 text-white placeholder-slate-700 focus:outline-none font-medium text-sm"
                   />
+                  {isContactPickerSupported && (
+                    <button
+                      type="button"
+                      onClick={handleImportContact}
+                      className="px-3 bg-slate-800 text-blue-400 rounded-2xl border border-blue-500/20 active:scale-95 transition-transform"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                    </button>
+                  )}
                   {showNameMenu && filteredSavedNames.length > 0 && nameSearch && (
                     <div className="absolute z-50 top-full left-0 right-0 mt-2 bg-[#11112b] border border-slate-700 rounded-2xl shadow-2xl overflow-hidden max-h-48 overflow-y-auto no-scrollbar">
                       {filteredSavedNames.map(name => (
@@ -366,62 +416,62 @@ const AddDebtModal: React.FC<AddDebtModalProps> = ({ initialData, savedNames = [
 
           {/* Interests and Late Fees Section */}
           <div className="p-4 bg-blue-600/5 rounded-2xl border border-blue-500/20 space-y-4">
-             <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-xs font-black text-blue-400 uppercase tracking-widest">Interests & Fees</h3>
-                  <p className="text-[10px] text-slate-500">Automate late penalties or interest</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => { hapticFeedback.action(); setFeeConfig({ ...feeConfig, enabled: !feeConfig.enabled }); }}
-                  className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors ${feeConfig.enabled ? 'bg-blue-600' : 'bg-slate-800'}`}
-                >
-                  <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${feeConfig.enabled ? 'translate-x-5.5' : 'translate-x-1'}`} />
-                </button>
-             </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xs font-black text-blue-400 uppercase tracking-widest">Interests & Fees</h3>
+                <p className="text-[10px] text-slate-500">Automate late penalties or interest</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => { hapticFeedback.action(); setFeeConfig({ ...feeConfig, enabled: !feeConfig.enabled }); }}
+                className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors ${feeConfig.enabled ? 'bg-blue-600' : 'bg-slate-800'}`}
+              >
+                <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${feeConfig.enabled ? 'translate-x-5.5' : 'translate-x-1'}`} />
+              </button>
+            </div>
 
-             {feeConfig.enabled && (
-               <div className="space-y-4 pt-2 border-t border-blue-500/10 animate-in slide-in-from-top-2">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1.5 block">Frequency</label>
-                      <select 
-                        value={feeConfig.frequency}
-                        onChange={(e) => setFeeConfig({ ...feeConfig, frequency: e.target.value as any })}
-                        className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-[10px] font-bold text-white outline-none"
-                      >
-                        <option value="ONCE">One-time</option>
-                        <option value="WEEKLY">Weekly</option>
-                        <option value="MONTHLY">Monthly</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1.5 block">Type</label>
-                      <select 
-                        value={feeConfig.type}
-                        onChange={(e) => setFeeConfig({ ...feeConfig, type: e.target.value as any })}
-                        className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-[10px] font-bold text-white outline-none"
-                      >
-                        <option value="FIXED">Fixed Amount ($)</option>
-                        <option value="PERCENTAGE">Percentage (%)</option>
-                      </select>
-                    </div>
-                  </div>
-
+            {feeConfig.enabled && (
+              <div className="space-y-4 pt-2 border-t border-blue-500/10 animate-in slide-in-from-top-2">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1.5 block">
-                      Value ({feeConfig.type === 'FIXED' ? '$' : '%'})
-                    </label>
-                    <input 
-                      type="number"
-                      step="0.01"
-                      value={feeConfig.value}
-                      onChange={(e) => setFeeConfig({ ...feeConfig, value: parseFloat(e.target.value) || 0 })}
-                      className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-white outline-none"
-                    />
+                    <label className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1.5 block">Frequency</label>
+                    <select
+                      value={feeConfig.frequency}
+                      onChange={(e) => setFeeConfig({ ...feeConfig, frequency: e.target.value as any })}
+                      className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-[10px] font-bold text-white outline-none"
+                    >
+                      <option value="ONCE">One-time</option>
+                      <option value="WEEKLY">Weekly</option>
+                      <option value="MONTHLY">Monthly</option>
+                    </select>
                   </div>
-               </div>
-             )}
+                  <div>
+                    <label className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1.5 block">Type</label>
+                    <select
+                      value={feeConfig.type}
+                      onChange={(e) => setFeeConfig({ ...feeConfig, type: e.target.value as any })}
+                      className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-[10px] font-bold text-white outline-none"
+                    >
+                      <option value="FIXED">Fixed Amount ($)</option>
+                      <option value="PERCENTAGE">Percentage (%)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1.5 block">
+                    Value ({feeConfig.type === 'FIXED' ? '$' : '%'})
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={feeConfig.value}
+                    onChange={(e) => setFeeConfig({ ...feeConfig, value: parseFloat(e.target.value) || 0 })}
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-white outline-none"
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           <div>
