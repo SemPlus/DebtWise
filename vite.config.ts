@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
   const isProd = mode === 'production';
 
   return {
-    base: isProd ? '/DebtWise/' : '/',
+    base: './',
     server: {
       port: 3000,
       host: '0.0.0.0',
@@ -25,8 +25,8 @@ export default defineConfig(({ mode }) => {
           theme_color: '#050510',
           background_color: '#050510',
           display: 'standalone',
-          start_url: '/DebtWise/',
-          scope: '/DebtWise/',
+          start_url: './',
+          scope: './',
           icons: [
             {
               src: 'icons/icon-192.png',

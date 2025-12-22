@@ -4,7 +4,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DebtWise - Smart Debt Tracker</title>
+  <script>
+    // 1. EARLIEST POSSIBLE ERROR HANDLER
+    window.onerror = function (msg, url, line, col, error) {
+      const errorMsg = "🛑 App Error: " + msg + "\nFile: " + url + "\nLine: " + line;
+      console.error(errorMsg);
+      const log = document.getElementById('debug-log');
+      if (log) {
+        log.style.display = 'block';
+        log.innerText += "\n" + errorMsg;
+      }
+      if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        alert(errorMsg);
+      }
+      return false;
+    };
+    window.addEventListener('unhandledrejection', function (event) {
+      const msg = "🛑 Promise Error: " + event.reason;
+      const log = document.getElementById('debug-log');
+      if (log) {
+        log.style.display = 'block';
+        log.innerText += "\n" + msg;
+      }
+      alert(msg);
+    });
+  </script>
+  <title>DebtWise - Debt Tracker</title>
   <meta name="theme-color" content="#050510">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -35,29 +60,12 @@
       background: #2e2e5f;
     }
   </style>
-  <script>
-    // 1. Ensure trailing slash for GitHub Pages (avoids 404s on relative assets)
-    if (window.location.pathname.endsWith('/DebtWise')) {
-      window.location.replace(window.location.pathname + '/');
-    }
-
-    // 2. Global error handler for mobile debugging
-    window.onerror = function (msg, url, line, col, error) {
-      const errorMsg = "🛑 App Error:\n" + msg + "\n\nFile: " + url + "\nLine: " + line;
-      console.error(errorMsg);
-      if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-        alert(errorMsg);
-      }
-      return false;
-    };
-
-    window.addEventListener('unhandledrejection', function (event) {
-      alert("🛑 Promise Error: " + event.reason);
-    });
-  </script>
-</head>
 
 <body>
+  <div id="debug-log"
+    style="display:none; background: #900; color: white; padding: 20px; font-family: monospace; white-space: pre-wrap; font-size: 12px; position: fixed; top: 0; left: 0; right: 0; z-index: 9999; max-height: 50vh; overflow: auto;">
+    ⚠️ Initialization Error:
+  </div>
   <div id="root"></div>
   <script type="module" src="index.tsx"></script>
 </body>
