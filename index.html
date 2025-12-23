@@ -4,29 +4,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DebtWise v1.2</title>
+  <title>DebtWise - Smart Debt Tracker</title>
 
   <script>
-    // Diagnostic Script v1.2
-    window.onload = function () {
-      console.log("DOM Loaded");
-      const marker = document.getElementById('version-marker');
-      if (marker) marker.style.opacity = '1';
-    };
-
+    // Global Error Handler
     window.onerror = function (m, u, l) {
-      const e = "🛑 ERROR: " + m + "\nFile: " + u + "\nLine: " + l;
-      alert(e);
-      const d = document.getElementById('debug');
-      if (d) { d.style.display = 'block'; d.innerText += "\n" + e; }
+      console.error("🛑 App Error: " + m + " at " + u + ":" + l);
       return false;
     };
 
+    // Service Worker Clearer (?killsw=true)
     if (window.location.search.includes('killsw=true')) {
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then(function (regs) {
           for (let r of regs) { r.unregister(); }
-          alert("✅ CACHE CLEARED! Reloading...");
+          alert("✅ Cache cleared! Reloading...");
           window.location.replace(window.location.pathname);
         });
       }
@@ -36,33 +28,37 @@
   <meta name="theme-color" content="#050510">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
     body {
-      background: #050510;
-      color: #fff;
+      font-family: 'Inter', sans-serif;
+      background-color: #050510;
+      color: #ffffff;
       margin: 0;
-      font-family: sans-serif;
+      -webkit-font-smoothing: antialiased;
     }
 
-    #version-marker {
-      position: fixed;
-      bottom: 10px;
-      right: 10px;
-      font-size: 10px;
-      color: #555;
-      opacity: 0;
-      pointer-events: none;
-      z-index: 9999;
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #0a0a1a;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #1e1e3f;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #2e2e5f;
     }
   </style>
 </head>
 
 <body>
-  <div id="version-marker">BUILD_VER: 1.2.0</div>
-  <div id="debug"
-    style="display:none; background:#900; color:#fff; padding:15px; position:fixed; top:0; left:0; right:0; z-index:9999; font-family:monospace; font-size:12px; border-bottom:2px solid #fff;">
-    ⚠️ INITIALIZATION FAILED:
-  </div>
   <div id="root"></div>
   <script type="module" src="index.tsx"></script>
 </body>
